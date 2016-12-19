@@ -1,0 +1,162 @@
+@name SmashHeads-MiniGame
+
+@inputs Heads:array EGPLiga ModoJogo:string
+@outputs Pontos Time
+
+@persist I PoteInc Altura PosInicial:table
+@persist Liga Start PreStart TempoMax
+@persist CorBoss:vector
+@trigger 
+
+if (first() | duped())
+{
+    runOnDmg(1)
+    
+    TempoMax = 20
+    
+    PosInicial = table()
+    Altura = 15
+    PoteInc = 1
+    I = 1
+    Pontos = 0
+    Time = TempoMax
+    
+    #Boss
+    CorBoss = vec(210, 0, 0)
+    
+    #Ligar Jogo
+    Liga = 0
+    PreStart = 1
+    Start = 0
+    
+}
+
+function void pegarPosInicial()
+{
+    while (I <= Heads:count())
+    {
+        PosInicial[I, vector] = Heads[I, entity]:pos()
+        I++
+    }
+}
+
+function void escolherBoss()
+{
+    local Boss = randint(1, Heads:count()+200)
+    Heads[Boss, entity]:setColor(CorBoss)  
+}
+
+function void animarHeads()
+{
+    if (ModoJogo == "Normal")
+    {
+        #Sobe o Pote
+        timer("potes", 500)
+        if (clk("potes"))
+        {
+            Heads[PoteInc, entity]:setPos(PosInicial[PoteInc, vector] + vec(0,0,Altura))
+            escolherBoss()
+        }
+        
+        #Muda o Pote
+        timer("inc", 500)
+        if (clk("inc")) {if(PoteInc < Heads:count()) {PoteInc++} else {PoteInc = 1}}
+    }
+    elseif(ModoJogo == "Aleatorio")
+    {
+        timer("rd", 500)
+        if (clk("rd"))
+        {
+            local RandomHead = randint(1, Heads:count())
+            Heads[RandomHead, entity]:setPos(PosInicial[RandomHead, vector] + vec(0,0,Altura))
+            escolherBoss()
+        }
+    }
+}
+
+function void detectarDanos()
+{
+    if (dmgClk())
+    {
+        local IAux = 1
+        local Crowbar = dmgAttacker():weapon():toString()
+        
+        if (Crowbar:find("crowbar") != 0)
+        {
+            while (IAux <= Heads:count())
+            {
+                if (dmgVictim() == Heads[IAux, entity] && Heads[IAux, entity]:pos():z() > PosInicial[IAux, vector]:z())
+                {
+                    if (Heads[IAux, entity]:getColor() == CorBoss)
+                    {
+                        Pontos += 5
+                        soundPlay(1, 4, "buttons/light_power_on_switch_01.wav")
+                        Heads[IAux, entity]:setColor(vec(255))
+                    }
+                    else
+                    {
+                        Pontos++
+                    }
+                    
+                    Heads[IAux, entity]:setPos(PosInicial[IAux, vector])
+                }
+                IAux++
+            }
+        }
+    }
+}
+
+function void resetarTudo()
+{
+    Altura = 10
+    PoteInc = 1
+    I = 1
+    Pontos = 0
+    Time = TempoMax
+    
+    #Ligar Jogo
+    Liga = 0
+    PreStart = 1
+    Start = 0
+    
+    local IAux = 1
+    while (IAux <= Heads:count())
+    {
+        Heads[IAux, entity]:setPos(PosInicial[IAux, vector])
+        Heads[IAux, entity]:setColor(vec(255))
+        IAux++
+    }
+}
+
+function void comecarJogo()
+{
+    timer("time", 1000)
+    if(clk("time"))
+    {
+        if (Time >= 0) {Time--}
+        else {Time = 0, Liga = 0, Start = 0, resetarTudo(), stoptimer("time")}
+    }
+}
+
+if (EGPLiga == 1) {Liga = 1} else {Liga = 0}
+
+if (Liga == 1)
+{
+    if (PreStart) {pegarPosInicial(), timer("l", 500)}
+    if (clk("l")) {PreStart = 0, Start = 1, stoptimer("l")}
+    
+    if (Start) 
+    {
+        comecarJogo()
+        
+        if (Time >= 0)
+        {
+            animarHeads()
+            detectarDanos()
+        }
+    }
+}
+elseif (Liga == 0 && Start == 1)
+{
+    resetarTudo()
+}

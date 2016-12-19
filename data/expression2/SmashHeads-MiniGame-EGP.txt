@@ -1,0 +1,209 @@
+@name SmashHeads-MiniGame-EGP
+
+@inputs S:wirelink User:entity [Pontos Tempo]:number
+@outputs ModoJogo:string EGPLiga
+
+@persist Target:entity [PosA PosB Cursor]:vector2
+@persist Pagina:string TLimpa Record
+@persist [BordaTela FundoTela TextoTela Botoes TextoBotao BotaoHover BotaoPress]:vector
+
+if (dupefinished())
+{
+    S:egpClear()
+    S:egpDrawTopLeft(1)
+    timer("EGPBugs", 2000)
+}
+
+if (first() | duped())
+{
+    S:egpClear()
+    S:egpDrawTopLeft(1)
+    
+    BordaTela = vec(230, 64, 23)
+    FundoTela = vec(25)
+    TextoTela = vec(230)
+    
+    Botoes = vec(230, 64, 23)
+    TextoBotao = vec(230)
+    BotaoHover = vec(160, 23, 230)
+    BotaoPress = vec(60)
+    
+    Pagina = "Inicial"
+    TLimpa = 0
+    
+    Target = noentity()
+    
+    #S:egpResolution(vec2(512), vec2(512))
+}
+
+interval(150)
+
+function void contruirBaseTela()
+{
+    S:egpBox(1, vec2(0), vec2(512))
+    S:egpColor(1, BordaTela)
+    
+    S:egpBox(2, vec2(16), vec2(480))
+    S:egpColor(2, FundoTela)
+    
+    S:egpText(3, "SmashHeads", vec2(256, 25))
+    S:egpAlign(3, 1)
+    S:egpSize(3, 70)
+    S:egpFont(3, "Coolvetica")
+    S:egpColor(3, TextoTela)
+    
+    S:egpText(4, "1.0", vec2(410, 25))
+    S:egpAlign(4, 1)
+    S:egpSize(4, 25)
+    S:egpFont(4, "Coolvetica")
+    S:egpColor(4, TextoTela)
+    
+    S:egpText(5, "by NickMBR", vec2(160, 75))
+    S:egpAlign(5, 1)
+    S:egpSize(5, 30)
+    S:egpFont(5, "Coolvetica")
+    S:egpColor(5, TextoTela)
+}
+
+function buildButtons(BID:number, Height:number, Texto:string, Arg:string)
+{
+    S:egpBox(BID, vec2(50, Height), vec2(400, 70))
+    S:egpColor(BID, Botoes)
+    
+    S:egpText(BID+1, Texto, vec2(256, Height+3))
+    S:egpAlign(BID+1, 1)
+    S:egpSize(BID+1, 60)
+    S:egpFont(BID+1, "Arial")
+    S:egpColor(BID+1, TextoBotao)
+}
+
+function string buttonPress(BID:number)
+{
+    PosA = S:egpPos(BID)
+    PosB = S:egpPos(BID) + S:egpSize(BID)
+    
+    if (Target:keyUse() && inrange(Cursor, PosA, PosB)) {S:egpColor(BID, BotaoPress), return "Pressed"}
+    elseif (inrange(Cursor, PosA, PosB)) {S:egpColor(BID, BotaoHover)}
+    else {S:egpColor(BID, Botoes)}
+    
+    return ""
+}
+
+function void limpaTela()
+{
+    S:egpClear()
+    TLimpa = 0
+}
+
+if (changed(Pagina)) {TLimpa = 1}
+if (Target == noentity()) {if (User:keyUse()) {Target = User}}
+if (clk("EGPBugs")) {TLimpa = 1, Pagina = "Inicial", stoptimer("EGPBugs")}
+
+Cursor = S:egpCursor(Target)
+
+if (Pagina == "Inicial")
+{
+    if (TLimpa == 1)
+    {
+        limpaTela()
+        contruirBaseTela()
+        
+        S:egpText(6, "Record", vec2(210, 177))
+        S:egpAlign(6, 1)
+        S:egpSize(6, 20)
+        S:egpFont(6, "Coolvetica")
+        S:egpColor(6, TextoTela)
+        S:egpAngle(6, 90)
+        
+        S:egpText(7, Record:toString(), vec2(256, 120))
+        S:egpAlign(7, 1)
+        S:egpSize(7, 130)
+        S:egpFont(7, "Coolvetica")
+        S:egpColor(7, TextoTela)
+        
+        buildButtons(8, 270, "Jogar", "")
+    }
+    
+    if (buttonPress(8) == "Pressed") {timer("mdjogo", 300)}
+    if (clk("mdjogo")) {TLimpa = 1, Pagina = "ModoJogo", stoptimer("mdjogo")}
+    
+    if (Record >= 10) {S:egpPos(6, vec2(180, 177))}
+    if (Record >= 100) {S:egpPos(6, vec2(150, 177))}
+    if (Record >= 1000) {S:egpPos(6, vec2(120, 177))}
+}
+elseif (Pagina == "ModoJogo")
+{
+    if (TLimpa == 1)
+    {
+        limpaTela()
+        contruirBaseTela()
+        
+        S:egpText(6, "Escolha um modo:", vec2(256, 130))
+        S:egpAlign(6, 1)
+        S:egpSize(6, 30)
+        S:egpFont(6, "Coolvetica")
+        S:egpColor(6, TextoTela)
+        
+        buildButtons(7, 180, "Normal", "")
+        buildButtons(9, 260, "Aleatorio", "")
+    }
+    
+    if (buttonPress(7) == "Pressed") {ModoJogo = "Normal", timer("jogar", 300)}
+    if (buttonPress(9) == "Pressed") {ModoJogo = "Aleatorio", timer("jogar", 300)}
+    
+    if (clk("jogar")) {TLimpa = 1, Pagina = "Jogar", stoptimer("jogar")}
+
+}
+elseif (Pagina == "Jogar")
+{
+    if (TLimpa == 1)
+    {
+        limpaTela()
+        contruirBaseTela()
+        
+        EGPLiga = 1
+        
+        S:egpText(6, "Pontos", vec2(210, 177))
+        S:egpAlign(6, 1)
+        S:egpSize(6, 20)
+        S:egpFont(6, "Coolvetica")
+        S:egpColor(6, TextoTela)
+        S:egpAngle(6, 90)
+        
+        S:egpText(7, Pontos:toString(), vec2(256, 120))
+        S:egpAlign(7, 1)
+        S:egpSize(7, 130)
+        S:egpFont(7, "Coolvetica")
+        S:egpColor(7, TextoTela)
+        
+        S:egpText(8, Tempo:toString(), vec2(256, 220))
+        S:egpAlign(8, 1)
+        S:egpSize(8, 60)
+        S:egpFont(8, "Coolvetica")
+        S:egpColor(8, TextoTela)
+    }
+    
+    if (Pontos >= 10) {S:egpPos(6, vec2(180, 177))}
+    if (Pontos >= 100) {S:egpPos(6, vec2(150, 177))}
+    if (Pontos >= 1000) {S:egpPos(6, vec2(120, 177))}
+    
+    if (Tempo > 0)
+    {
+        S:egpSetText(7, Pontos:toString())
+        S:egpSetText(8, Tempo:toString())
+    }
+    elseif (Tempo == 0)
+    {
+        timer("finalizar", 300)
+    }
+    
+    if (clk("finalizar"))
+    {
+        TLimpa = 1
+        Pagina = "Inicial"
+        EGPLiga = 0
+        Target = noentity()
+        
+        stoptimer("finalizar")
+    }
+}
