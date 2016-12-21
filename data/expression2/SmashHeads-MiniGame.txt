@@ -1,10 +1,10 @@
 @name SmashHeads-MiniGame
 
-@inputs Heads:array EGPLiga ModoJogo:string
+@inputs Heads:array EGPLiga ModoJogo:string PropMusica:entity
 @outputs Pontos Time
 
 @persist I PoteInc Altura PosInicial:table
-@persist Liga Start PreStart TempoMax
+@persist Liga Start PreStart
 @persist CorBoss:vector
 @trigger 
 
@@ -12,14 +12,13 @@ if (first() | duped())
 {
     runOnDmg(1)
     
-    TempoMax = 20
+    Time = 5
     
     PosInicial = table()
     Altura = 15
     PoteInc = 1
     I = 1
     Pontos = 0
-    Time = TempoMax
     
     #Boss
     CorBoss = vec(210, 0, 0)
@@ -27,8 +26,7 @@ if (first() | duped())
     #Ligar Jogo
     Liga = 0
     PreStart = 1
-    Start = 0
-    
+    Start = 0    
 }
 
 function void pegarPosInicial()
@@ -108,11 +106,11 @@ function void detectarDanos()
 
 function void resetarTudo()
 {
-    Altura = 10
+    Altura = 15
     PoteInc = 1
     I = 1
     Pontos = 0
-    Time = TempoMax
+    Time = 5
     
     #Ligar Jogo
     Liga = 0
@@ -134,16 +132,19 @@ function void comecarJogo()
     if(clk("time"))
     {
         if (Time >= 0) {Time--}
-        else {Time = 0, Liga = 0, Start = 0, resetarTudo(), stoptimer("time")}
+        else {Time = 0, Start = 0, Altura = 0,resetarTudo(), stoptimer("time")}
     }
 }
 
-if (EGPLiga == 1) {Liga = 1} else {Liga = 0}
-
-if (Liga == 1)
+if (EGPLiga == 1)
 {
     if (PreStart) {pegarPosInicial(), timer("l", 500)}
-    if (clk("l")) {PreStart = 0, Start = 1, stoptimer("l")}
+    if (clk("l"))
+    {
+        PreStart = 0
+        Start = 1
+        stoptimer("l")
+    }
     
     if (Start) 
     {
@@ -156,7 +157,7 @@ if (Liga == 1)
         }
     }
 }
-elseif (Liga == 0 && Start == 1)
+elseif (EGPLiga == 0 && Start == 1)
 {
     resetarTudo()
 }

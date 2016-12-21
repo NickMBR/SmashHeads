@@ -1,11 +1,12 @@
 @name SmashHeads-MiniGame-EGP
 
-@inputs S:wirelink User:entity [Pontos Tempo]:number
+@inputs S:wirelink User:entity [Pontos Tempo]:number PropMusic:entity
 @outputs ModoJogo:string EGPLiga
 
 @persist Target:entity [PosA PosB Cursor]:vector2
 @persist Pagina:string TLimpa Record
 @persist [BordaTela FundoTela TextoTela Botoes TextoBotao BotaoHover BotaoPress]:vector
+@persist MusicR [Musicas RMusic RLMusic]:array
 
 if (dupefinished())
 {
@@ -32,6 +33,10 @@ if (first() | duped())
     TLimpa = 0
     
     Target = noentity()
+    
+    Musicas = array("music/kellybailey_01/mainmenu.mp3", "music/kitheory_01/mainmenu.mp3", "music/mattlange_01/mainmenu.mp3")
+    RMusic = array("music/kellybailey_01/roundmvpanthem_01.mp3", "music/kitheory_01/roundmvpanthem_01.mp3", "music/mattlange_01/roundmvpanthem_01.mp3")
+    RLMusic = array("music/kellybailey_01/lostround.mp3", "music/kitheory_01/lostround.mp3", "music/mattlange_01/lostround.mp3")
     
     #S:egpResolution(vec2(512), vec2(512))
 }
@@ -162,6 +167,7 @@ elseif (Pagina == "Jogar")
         contruirBaseTela()
         
         EGPLiga = 1
+        MusicR = randint(1, 3)
         
         S:egpText(6, "Pontos", vec2(210, 177))
         S:egpAlign(6, 1)
@@ -181,6 +187,8 @@ elseif (Pagina == "Jogar")
         S:egpSize(8, 60)
         S:egpFont(8, "Coolvetica")
         S:egpColor(8, TextoTela)
+        
+        soundPlay(1, 60, Musicas[MusicR, string])
     }
     
     if (Pontos >= 10) {S:egpPos(6, vec2(180, 177))}
@@ -194,6 +202,16 @@ elseif (Pagina == "Jogar")
     }
     elseif (Tempo == 0)
     {
+        if (Pontos > Record)
+        {
+            Record = Pontos
+            soundPlay(1, 6, RMusic[MusicR, string])
+        }
+        else
+        {
+            soundPlay(1, 6, RLMusic[MusicR, string])
+        }
+        
         timer("finalizar", 300)
     }
     
