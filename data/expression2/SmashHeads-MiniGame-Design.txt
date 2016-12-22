@@ -1,0 +1,80 @@
+@name SmashHeads-Minigame-Design
+@inputs [Base BaseSprite]:entity Anim:string
+@outputs
+@persist E2:entity Aux Aux2
+@trigger 
+
+if (first() | dupefinished())
+{
+    E2 = entity()
+    holoCreate(1, Base:pos()+vec(0,-5,5))
+    holoScale(1, vec(4))
+    holoModel(1, "models/Gibs/HGIBS.mdl")
+    holoAng(1, E2:toWorld(ang(-70, 0, 0)))
+    
+    local I = 1
+    while (I < 16)
+    {
+        spriteSpawn(I, "sprites/light_glow03.vmt")
+        spriteSetScale(I, 0.1)
+        spriteSetPos(I, BaseSprite:toWorld(vec((12)-I*3, -38, 2)))
+        spriteSetAlpha(I, 200)
+        I++
+    }
+    
+    local I2 = 1
+    while (I2 < 25)
+    {
+        spriteSpawn(I2+16, "sprites/light_glow03.vmt")
+        spriteSetScale(I2+16, 0.1)
+        spriteSetPos(I2+16, BaseSprite:toWorld(vec(-38, (-38)+I2*3, 2)))
+        spriteSetAlpha(I2+16, 200)
+        I2++
+    }
+    
+    local I3 = 1
+    while (I3 < 16)
+    {
+        spriteSpawn(I3+41, "sprites/light_glow03.vmt")
+        spriteSetScale(I3+41, 0.1)
+        spriteSetPos(I3+41, BaseSprite:toWorld(vec((-36)+I3*3, 38, 2)))
+        spriteSetAlpha(I3+41, 200)
+        I3++
+    }
+    
+    Aux = 0
+    BlinkCount = 0
+}
+
+if (Anim == "GoGoBack")
+{
+    interval(30)
+    if (Aux < 57) {Aux++} else {Aux = 0, Aux2 = !Aux2}
+    spriteEnable(Aux, Aux2)
+}
+elseif (Anim == "Blink")
+{
+    Aux = 0
+    timer("bk", 300)
+    if (clk("bk")) {Aux2 = !Aux2}
+    
+    if (!Aux2)
+    {
+        local I = 0
+        while (I < 57)
+        {
+            spriteEnable(I, 1)
+            I++
+        }
+    }
+    if (Aux2)
+    {
+        local I = 0
+        while (I < 57)
+        {
+            spriteEnable(I, 0)
+            I++
+        }
+    }
+    
+}

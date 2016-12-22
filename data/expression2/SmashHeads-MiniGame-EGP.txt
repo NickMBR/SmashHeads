@@ -1,7 +1,7 @@
 @name SmashHeads-MiniGame-EGP
 
 @inputs S:wirelink User:entity [Pontos Tempo]:number PropMusic:entity
-@outputs ModoJogo:string EGPLiga
+@outputs ModoJogo:string EGPLiga Anim:string
 
 @persist Target:entity [PosA PosB Cursor]:vector2
 @persist Pagina:string TLimpa Record
@@ -31,6 +31,7 @@ if (first() | duped())
     
     Pagina = "Inicial"
     TLimpa = 0
+    Record = Record
     
     Target = noentity()
     
@@ -188,7 +189,7 @@ elseif (Pagina == "Jogar")
         S:egpFont(8, "Coolvetica")
         S:egpColor(8, TextoTela)
         
-        soundPlay(1, 60, Musicas[MusicR, string])
+        PropMusic:soundPlay(1, 60, Musicas[MusicR, string])
     }
     
     if (Pontos >= 10) {S:egpPos(6, vec2(180, 177))}
@@ -199,24 +200,18 @@ elseif (Pagina == "Jogar")
     {
         S:egpSetText(7, Pontos:toString())
         S:egpSetText(8, Tempo:toString())
+        Anim = "Blink"
     }
     elseif (Tempo == 0)
     {
-        if (Pontos > Record)
-        {
-            Record = Pontos
-            soundPlay(1, 6, RMusic[MusicR, string])
-        }
-        else
-        {
-            soundPlay(1, 6, RLMusic[MusicR, string])
-        }
-        
+        if (Pontos > Record) {Record = Pontos}
+        Anim = "GoGoBack"
         timer("finalizar", 300)
     }
     
     if (clk("finalizar"))
     {
+        if (changed(Record)) {PropMusic:soundPlay(1, 6, RMusic[MusicR, string])} else {PropMusic:soundPlay(1, 6, RLMusic[MusicR, string])}
         TLimpa = 1
         Pagina = "Inicial"
         EGPLiga = 0

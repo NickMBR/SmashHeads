@@ -1,10 +1,10 @@
 @name SmashHeads-MiniGame
 
-@inputs Heads:array EGPLiga ModoJogo:string PropMusica:entity
+@inputs Heads:array EGPLiga ModoJogo:string
 @outputs Pontos Time
 
 @persist I PoteInc Altura PosInicial:table
-@persist Liga Start PreStart
+@persist Liga Start PreStart TempoMax HitPoint BossHitPoint
 @persist CorBoss:vector
 @trigger 
 
@@ -12,21 +12,22 @@ if (first() | duped())
 {
     runOnDmg(1)
     
-    Time = 5
+    #Configure:
+    TempoMax = 30
+    HitPoint = 10
+    BossHitPoint = 50
+    CorBoss = vec(210, 0, 0)
     
+    #Nao Mude
     PosInicial = table()
     Altura = 15
     PoteInc = 1
     I = 1
     Pontos = 0
-    
-    #Boss
-    CorBoss = vec(210, 0, 0)
-    
-    #Ligar Jogo
     Liga = 0
     PreStart = 1
-    Start = 0    
+    Start = 0 
+    Time = TempoMax  
 }
 
 function void pegarPosInicial()
@@ -87,13 +88,13 @@ function void detectarDanos()
                 {
                     if (Heads[IAux, entity]:getColor() == CorBoss)
                     {
-                        Pontos += 5
+                        Pontos += BossHitPoint
                         soundPlay(1, 4, "buttons/light_power_on_switch_01.wav")
                         Heads[IAux, entity]:setColor(vec(255))
                     }
                     else
                     {
-                        Pontos++
+                        Pontos += HitPoint
                     }
                     
                     Heads[IAux, entity]:setPos(PosInicial[IAux, vector])
@@ -110,7 +111,7 @@ function void resetarTudo()
     PoteInc = 1
     I = 1
     Pontos = 0
-    Time = 5
+    Time = TempoMax
     
     #Ligar Jogo
     Liga = 0
