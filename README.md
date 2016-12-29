@@ -2,7 +2,7 @@
 SmashHeads é um minigame para Garry's Mod, criado do zero no canal [NickMBR](https://www.youtube.com/playlist?list=PLJTcsC8FCwJupOD4qXEzD-ozmN5UHDEV9), com Expression2.
 
 # Instalação
-Baixe o arquivo .zip e extraia o conteúdo para a pasta "common/GarrysMod/garrysmod".
+Baixe o arquivo .zip e extraia a pasta `data` para a pasta "../common/GarrysMod/garrysmod".
 
 # Utilização
 São necessários os seguintes addons para funcionar:
