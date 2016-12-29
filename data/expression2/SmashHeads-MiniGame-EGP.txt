@@ -1,10 +1,11 @@
 @name SmashHeads-MiniGame-EGP
 
 @inputs S:wirelink User:entity [Pontos Tempo]:number PropMusic:entity
-@outputs ModoJogo:string EGPLiga Anim:string
+@inputs AFKT TempoMax
+@outputs ModoJogo:string EGPLiga Anim:string Ply:entity
 
 @persist Target:entity [PosA PosB Cursor]:vector2
-@persist Pagina:string TLimpa Record
+@persist Pagina:string TLimpa Record AFKCount
 @persist [BordaTela FundoTela TextoTela Botoes TextoBotao BotaoHover BotaoPress]:vector
 @persist MusicR [Musicas RMusic RLMusic]:array
 
@@ -101,6 +102,20 @@ function void limpaTela()
     TLimpa = 0
 }
 
+function void afkSystem()
+{
+    timer("afk", 1000)
+    if (clk("afk")) {AFKCount++}
+    
+    if (AFKCount >= AFKT)
+    {
+        TLimpa = 1
+        Pagina = "Inicial"
+        Target = noentity()
+        AFKCount = 0
+    }
+}
+
 if (changed(Pagina)) {TLimpa = 1}
 if (Target == noentity()) {if (User:keyUse()) {Target = User}}
 if (clk("EGPBugs")) {TLimpa = 1, Pagina = "Inicial", stoptimer("EGPBugs")}
@@ -109,6 +124,7 @@ Cursor = S:egpCursor(Target)
 
 if (Pagina == "Inicial")
 {
+    afkSystem()
     if (TLimpa == 1)
     {
         limpaTela()
@@ -139,6 +155,7 @@ if (Pagina == "Inicial")
 }
 elseif (Pagina == "ModoJogo")
 {
+    afkSystem()
     if (TLimpa == 1)
     {
         limpaTela()
@@ -154,8 +171,8 @@ elseif (Pagina == "ModoJogo")
         buildButtons(9, 260, "Aleatorio", "")
     }
     
-    if (buttonPress(7) == "Pressed") {ModoJogo = "Normal", timer("jogar", 300)}
-    if (buttonPress(9) == "Pressed") {ModoJogo = "Aleatorio", timer("jogar", 300)}
+    if (buttonPress(7) == "Pressed") {Ply = Target, ModoJogo = "Normal", timer("jogar", 300)}
+    if (buttonPress(9) == "Pressed") {Ply = Target, ModoJogo = "Aleatorio", timer("jogar", 300)}
     
     if (clk("jogar")) {TLimpa = 1, Pagina = "Jogar", stoptimer("jogar")}
 
@@ -189,7 +206,7 @@ elseif (Pagina == "Jogar")
         S:egpFont(8, "Coolvetica")
         S:egpColor(8, TextoTela)
         
-        PropMusic:soundPlay(1, 60, Musicas[MusicR, string])
+        PropMusic:soundPlay(1, TempoMax+10, Musicas[MusicR, string])
     }
     
     if (Pontos >= 10) {S:egpPos(6, vec2(180, 177))}
@@ -211,7 +228,7 @@ elseif (Pagina == "Jogar")
     
     if (clk("finalizar"))
     {
-        if (changed(Record)) {PropMusic:soundPlay(1, 6, RMusic[MusicR, string])} else {PropMusic:soundPlay(1, 6, RLMusic[MusicR, string])}
+        if (changed(Record)) {PropMusic:soundPlay(1, 20, RMusic[MusicR, string])} else {PropMusic:soundPlay(1, 20, RLMusic[MusicR, string])}
         TLimpa = 1
         Pagina = "Inicial"
         EGPLiga = 0

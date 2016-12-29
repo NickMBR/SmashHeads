@@ -1,21 +1,22 @@
 @name SmashHeads-MiniGame
 
-@inputs Heads:array EGPLiga ModoJogo:string
-@outputs Pontos Time
+@inputs Heads:array EGPLiga ModoJogo:string Ply:entity
+@outputs Pontos Time TimeAFK TempoMax
 
 @persist I PoteInc Altura PosInicial:table
-@persist Liga Start PreStart TempoMax HitPoint BossHitPoint
+@persist Start PreStart TempoMax HitPoint BossHitPoint
 @persist CorBoss:vector
 @trigger 
 
 if (first() | duped())
 {
-    runOnDmg(1)
+    runOnDmg(1, Heads)
     
     #Configure:
-    TempoMax = 30
-    HitPoint = 10
-    BossHitPoint = 50
+    TempoMax = 60
+    TimeAFK = 30
+    HitPoint = 5
+    BossHitPoint = 20
     CorBoss = vec(210, 0, 0)
     
     #Nao Mude
@@ -24,10 +25,14 @@ if (first() | duped())
     PoteInc = 1
     I = 1
     Pontos = 0
-    Liga = 0
     PreStart = 1
     Start = 0 
     Time = TempoMax  
+}
+
+if (dupefinished())
+{
+    runOnDmg(1, Heads)
 }
 
 function void pegarPosInicial()
@@ -80,7 +85,7 @@ function void detectarDanos()
         local IAux = 1
         local Crowbar = dmgAttacker():weapon():toString()
         
-        if (Crowbar:find("crowbar") != 0)
+        if (Crowbar:find("crowbar") != 0 && dmgAttacker() == Ply)
         {
             while (IAux <= Heads:count())
             {
@@ -114,7 +119,6 @@ function void resetarTudo()
     Time = TempoMax
     
     #Ligar Jogo
-    Liga = 0
     PreStart = 1
     Start = 0
     
